@@ -45,8 +45,34 @@
 ##
 ######################################################################
 
+######################################################################
+# These settings are used to control the database used for interactive
+# development/testing
+######################################################################
+bootstrap.database.type=hsqldb
 bootstrap.database.driver=org.hsqldb.jdbcDriver
 bootstrap.database.url=jdbc:hsqldb:file:libro.hsqldb
-bootstrap.database.name=libro
 bootstrap.database.username=sa
 bootstrap.database.password=
+
+######################################################################
+# These settings are specific for the unit tests
+#
+# NOTE:  currently, the junit tests won't work with the same HSQLDB
+# settings as above because it thinks the database is already in use.
+# To run the unit tests using hsqldb, you must run the server in
+# standalone mode.
+######################################################################
+junit.database.type=postgresql
+junit.database.name=libro-junit
+junit.database.driver=org.postgresql.Driver
+junit.database.url=jdbc:postgresql://localhost:5432/libro-junit
+junit.database.username=<USERNAME>
+junit.database.password=
+
+# set the ErrorTrace properties
+junit.errortrace.tracelevel=10
+junit.errortrace.tracefile=libro-junit.trace
+
+# set the log4j properties
+junit.log4j.appender.ROLLING.File=libro-junit.log

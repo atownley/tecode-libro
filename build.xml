@@ -2,7 +2,7 @@
 <!--
 //////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2004, Andrew S. Townley
+// Copyright (c) 2004-2005, Andrew S. Townley
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,9 @@
 	<property name="src.dir"	value="src/java"/>
 	<property name="src.sql.dir"	value="src/sql"/>
 	<property name="src.etc.dir"	value="src/etc"/>
-	<property name="tests.dir"	value="tests/java"/>
+	<property name="tests.dir"	value="tests/junit"/>
 	<property name="tests.lib.dir"	value="tests/lib"/>
+	<property name="tests.sql.dir"	value="tests/sql"/>
 	<property name="tests.data.dir"	value="tests/data"/>
 	<property name="build.version"	value="${basedir}/version.properties"/>
 	<property name="build.date"	value="${basedir}/version.date"/>
@@ -70,13 +71,14 @@
 		<delete file="${verstamp}"/>
 	</target>
 
-	<target name="verstamp" depends="builddate" >
+	<target name="verstamp" depends="builddate">
 		<property file="${build.version}" />
 		<property name="version"	value="${build.version.major}.${build.version.minor}.${build.version.release}"/>
 		<property name="dist.dir"	value="${app.name}-${version}"/>
 		
 		<filter filtersfile="${build.version}"/>
 		<filter filtersfile="${build.date}"/>
+		<filter filtersfile="build.properties"/>
 		
 		<copy todir="${basedir}" filtering="true">
 			<mapper type="glob" from="*.in" to="*"/>
@@ -85,7 +87,8 @@
 		</copy>
 	</target>
 
-	<target name="cmbuild" depends="distclean,builddate">
+	<target name="cmbuild" depends="distclean,builddate"
+			description="This is the automated build target.">
 		<!-- increment the build counter -->
 		<propertyfile file="${build.count}"
 			comment=" Official build file.  DO NOT EDIT.">
@@ -97,6 +100,7 @@
 		<filter filtersfile="${build.version}"/>
 		<filter filtersfile="${build.date}"/>
 		<filter filtersfile="${build.count}"/>
+		<filter filtersfile="build.properties"/>
 		
 		<copy todir="${basedir}" filtering="true">
 			<mapper type="glob" from="*.in" to="*"/>
@@ -130,7 +134,8 @@
 		</fileset>
 	</path>
 
-	<target name="all" depends="verstamp,jar" />
+	<target name="all" depends="verstamp,jar" 
+			description="This is the general-purpose build target."/>
 
 	<target name="setup">
 		<mkdir dir="${build.dir}"/>
@@ -211,7 +216,8 @@
 			includes="${dist.dir}/**" />
 	</target>
 
-	<target name="docs" depends="compile">
+	<target name="docs" depends="compile"
+			description="This target builds the javadocs">
 		<mkdir dir="docs/api"/>
 		<javadoc packagenames="com.townleyenterprises.*"
 			windowtitle="Libro API"
@@ -223,7 +229,7 @@
 		</javadoc>
 	</target>
 
-	<target name="clean">
+	<target name="clean" description="This target removes most of the generated build files">
 		<delete file="${app.name}.jar"/>
 		<delete file="${dist.dir}.zip"/>
 		<delete file="${dist.dir}-src.zip"/>
@@ -235,7 +241,8 @@
 		</delete>
 	</target>
 
-	<target name="distclean" depends="clean">
+	<target name="distclean" depends="clean"
+			description="This target removes *all* of the generated build files.">
 		<delete>
 			<fileset dir="${basedir}" includes="**/*">
 				<present targetdir="${basedir}">
@@ -247,7 +254,6 @@
 			<fileset dir="${basedir}" includes="${app.name}*.zip"/>
 		</delete>
 		<delete file="${build.date}"/>
-		<delete dir="clover"/>
 	</target>
 
 	<target name="compile-tests" depends="jar">
@@ -260,14 +266,20 @@
 			debug="on" deprecation="off">
 			<classpath>
 				<path refid="build.cp"/>
+				<path refid="tests.cp"/>
 				<pathelement location="${app.name}.jar"/>
 			</classpath>
 			<include name="**/*.java"/>
 		</javac>
 	</target>
 
-	<target name="junit" depends="compile-tests">
+	<target name="junit" depends="verstamp,cleanup-db-junit,junit-run" description="This is the manual target to run the JUnit tests.  If this target fails, try the 'junit-run' target."/>
+
+	<target name="junit-run" depends="compile-tests,junit-db"
+			description="This target is used to run the unit tests without attempting to delete the unit test database.">
 		<mkdir dir="${reports.tests}"/>
+		<delete file="${junit.errortrace.tracefile}"/>
+		<delete file="${junit.log4j.appender.ROLLING.File}"/>
 		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
 			<classpath>
 				<path refid="build.cp"/>
@@ -286,28 +298,6 @@
 			</batchtest>
 		</junit>
 	</target>
-
-	<!-- clover support -->
-	<taskdef resource="clovertasks"/>
-
-	<target name="with-clover">
-		<mkdir dir="clover"/>
-		<clover-setup initString="clover/te-common.db"
-				flushpolicy="interval"
-				flushinterval="200">
-			<fileset dir="${src.dir}"/>
-		</clover-setup>
-	</target>
-
-	<target name="clover-report" depends="with-clover">
-		<clover-report>
-			<current outfile="clover/report" title="TE-Common">
-				<format type="html"/>
-			</current>
-		</clover-report>
-	</target>
-
-	<target name="clover" depends="clean,with-clover,jar,junit,clover-report"/>
 
 	<!-- jaxor target -->
 	<target name="jaxor" depends="setup">
@@ -351,4 +341,35 @@
 			<transaction src="${src.sql.dir}/cleanup.sql"/>
 		</sql>
 	</target>
+
+	<target name="reset-db" depends="cleanup-db,create-db"/>
+	
+	<target name="create-db-junit" depends="jar">
+		<sql driver="${junit.database.driver}"
+				url="${junit.database.url}"
+				userid="${junit.database.username}"
+				password="${junit.database.password}">
+			<classpath>
+				<path refid="build.cp"/>
+			</classpath>
+			<transaction src="${src.sql.dir}/schema.sql"/>
+			<transaction src="${src.sql.dir}/bootstrap.sql"/>
+			<transaction src="${tests.sql.dir}/bootstrap.sql"/>
+		</sql>
+	</target>
+
+	<target name="cleanup-db-junit" depends="jar">
+		<sql driver="${junit.database.driver}"
+				url="${junit.database.url}"
+				userid="${junit.database.username}"
+				password="${junit.database.password}">
+			<classpath>
+				<path refid="build.cp"/>
+			</classpath>
+			<transaction src="${tests.sql.dir}/cleanup.sql"/>
+			<transaction src="${src.sql.dir}/cleanup.sql"/>
+		</sql>
+	</target>
+
+	<target name="junit-db" depends="create-db-junit"/>
 </project>

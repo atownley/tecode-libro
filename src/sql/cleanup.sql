@@ -37,12 +37,11 @@
 -- File:		cleanup.sql
 -- Created:		Mon Dec 27 16:15:21 GMT 2004
 --
--- $Id: cleanup.sql,v 1.1 2004/12/28 11:11:29 atownley Exp $
+-- $Id: cleanup.sql,v 1.2 2004/12/28 21:58:49 atownley Exp $
 --
 ----------------------------------------------------------------------
 
 drop table book;
-drop table validuser;
 drop table publisher;
 drop table author;
 drop table counter;

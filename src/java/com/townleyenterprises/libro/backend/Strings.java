@@ -43,7 +43,6 @@ package com.townleyenterprises.libro.backend;
 
 import com.townleyenterprises.common.ResourceLoader;
 import com.townleyenterprises.common.ResourceManager;
-import com.townleyenterprises.common.Version;
 
 import com.townleyenterprises.libro.Libro;
 
@@ -51,7 +50,7 @@ import com.townleyenterprises.libro.Libro;
  * This class is used to track all of the localized strings used for
  * messages in this package.
  *
- * @version $Id: Strings.java,v 1.2 2005/01/02 21:59:18 atownley Exp $
+ * @version $Id: Strings.java,v 1.3 2005/01/09 11:17:36 atownley Exp $
  * @author <a href="mailto:adz1092@yahoo.com">Andrew S. Townley</a>
  * @since 3.0
  */

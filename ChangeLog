@@ -1,3 +1,40 @@
+2005-01-02 Andrew S. Townley <atownley>
+	* Added unit test mechanism
+
+	* src/java/com/townleyenterprises/libro/libro.properties
+
+	  Added counter-related property.
+	  Fixed the mistake with the property settings
+	  Added properties for postgresql
+
+	* src/java/com/townleyenterprises/libro/backend/Author.jaxor
+	  src/java/com/townleyenterprises/libro/backend/Book.jaxor
+	  src/java/com/townleyenterprises/libro/backend/Publisher.jaxor
+
+	  Changed the key types to longs even though it isn't that way
+	  in the database.  Makes the rest of the code more reusable.
+
+	* Added resource strings to the backend package
+
+	* Updated the copyright notice in all files
+
+	* build.xml
+
+	  Removed unused Clover support (may come back later)
+	  Added descriptions to the main build targets
+	  Added DB init/cleanup for live and junit configurations
+	  Added some extra parameters for the unit tests
+
+	* src/etc/classpath.sh
+
+	  Added jars for the unit tests
+
+	* src/sql/schema.sql.in
+	  src/sql/bootstrap.sql
+
+	  Changed column name for the counter table since HSQLDB can't
+	  handle a column named 'count'.
+
 2004-12-28 Andrew S. Townley <atownley>
 	* Added connection factory support for use by both te-common
 	  and Jaxor.

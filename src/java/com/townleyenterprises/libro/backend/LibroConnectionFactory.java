@@ -70,7 +70,7 @@ import com.townleyenterprises.trace.BasicTrace;
  * "Double Checked Locking is Broken" Declaration</a></em>.
  * </p>
  *
- * @version $Id: LibroConnectionFactory.java,v 1.1 2004/12/28 21:54:31 atownley Exp $
+ * @version $Id: LibroConnectionFactory.java,v 1.2 2005/01/02 21:23:45 atownley Exp $
  * @author <a href="mailto:atownley@users.sourceforge.net">Andrew S. Townley</a>
  */
 
@@ -181,5 +181,5 @@ public final class LibroConnectionFactory
 	private Connection		_conn = null;
 
 	/** our trace instance */
-	private static BasicTrace	_trace = new BasicTrace("LibroConnectionFactory");
+	private static final BasicTrace	_trace = new BasicTrace("LibroConnectionFactory");
 }

@@ -37,9 +37,10 @@
 ## File:	statements.sql
 ## Created:	Wed Dec 29 11:20:12 GMT 2004
 ##
-## $Id: statements.sql,v 1.1 2005/01/02 21:24:29 atownley Exp $
+## $Id: statements.sql,v 1.2 2005/01/09 11:18:55 atownley Exp $
 ##
 ######################################################################
 
 counter.get=select val from counter where what = ? for update
 counter.set=update counter set val = ? where what = ?
+version.get=select version, installed, rcsid from version_info where what = ?

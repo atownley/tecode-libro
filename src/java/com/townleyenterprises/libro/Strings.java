@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2004, Andrew S. Townley
+// Copyright (c) 2004-2005, Andrew S. Townley
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ import com.townleyenterprises.common.Version;
  * This class is used to track all of the localized strings used for
  * messages in this package.
  *
- * @version $Id: Strings.java,v 1.1 2004/12/28 11:11:30 atownley Exp $
+ * @version $Id: Strings.java,v 1.2 2005/01/02 22:41:15 atownley Exp $
  * @author <a href="mailto:adz1092@yahoo.com">Andrew S. Townley</a>
  * @since 3.0
  */

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2004, Andrew S. Townley
+// Copyright (c) 2004-2005, Andrew S. Townley
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ import com.townleyenterprises.libro.backend.LibroConnectionFactory;
  * find the appropriate logger.
  * </p>
  *
- * @version $Id: Libro.java,v 1.2 2004/12/28 21:58:06 atownley Exp $
+ * @version $Id: Libro.java,v 1.3 2005/01/02 22:40:57 atownley Exp $
  * @author <a href="mailto:atownley@users.sourceforge.net">Andrew S. Townley</a>
  */
 

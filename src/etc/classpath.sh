@@ -65,5 +65,6 @@ else
 			do
 				CLASSPATH=$f:$CLASSPATH; export CLASSPATH
 			done
+		fi
 	fi
 fi

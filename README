@@ -30,9 +30,12 @@ To build the system, copy the build.properties-sample to
 build.properties and edit it to suit your own configuration.  Once
 this has been done, simply build the system using ant.
 
+You must also have the tests/lib/junit.jar as part of your CLASSPATH
+when invoking the unit tests.
+
 RUNNING
 
 Currently, there is not enough of the system in place to run.
 
 --
-$Id: README,v 1.2 2005/02/06 22:44:15 atownley Exp $
+$Id: README,v 1.3 2005/02/06 22:46:32 atownley Exp $

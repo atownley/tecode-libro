@@ -81,7 +81,7 @@ import com.townleyenterprises.libro.backend.LibroConnectionFactory;
  * find the appropriate logger.
  * </p>
  *
- * @version $Id: Libro.java,v 1.3 2005/01/02 22:40:57 atownley Exp $
+ * @version $Id: Libro.java,v 1.4 2005/01/09 11:12:19 atownley Exp $
  * @author <a href="mailto:atownley@users.sourceforge.net">Andrew S. Townley</a>
  */
 
@@ -138,7 +138,21 @@ public final class Libro
 
 	public static ConnectionFactory getConnectionFactory()
 	{
-		return _cfactory;
+		_trace.methodStart("getConnectionFactory");
+
+		try
+		{
+			if(!_initialized)
+			{
+				throw (RuntimeException)_trace.methodThrow(new RuntimeException(Strings.get("sAppNotInitialized")), true);
+			}
+
+			return (ConnectionFactory)_trace.methodReturn(_cfactory);
+		}
+		finally
+		{
+			_trace.methodExit();
+		}
 	}
 
 	/**
@@ -249,6 +263,9 @@ public final class Libro
 	public static void shutdown()
 	{
 		_trace.methodStart("shutdown");
+
+		_initialized = false;
+		_cfactory.end();
 
 		logInfo("log.sAppStopped");
 
@@ -377,9 +394,6 @@ public final class Libro
 			
 			ConfigRegistry.registerSupplier(baseconfig);
 
-			// configure log4j
-			PropertyConfigurator.configure(baseconfig.getProperties());
-
 			try
 			{
 				// override configuration is the
@@ -394,11 +408,22 @@ public final class Libro
 			}
 			catch(IOException e)
 			{
+				// configure log4j (done here because
+				// we don't want to create unnecessary
+				// log files if the override versions
+				// exist)
+				PropertyConfigurator.configure(baseconfig.getProperties());
+
 				// this isn't a showstopper
 				logWarning("log.fLoadInstallConfigFailed", new Object[] { e });
 			}
 			catch(NullPointerException e)
 			{
+				// configure log4j (done here because
+				// we don't want to create unnecessary
+				// log files if the override versions
+				// exist)
+				PropertyConfigurator.configure(baseconfig.getProperties());
 				// in this case, it means that the
 				// file doesn't exist in the resource
 				// stream... nice, huh?

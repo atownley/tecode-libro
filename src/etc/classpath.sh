@@ -56,5 +56,14 @@ else
 		do
 			CLASSPATH=$f:$CLASSPATH; export CLASSPATH
 		done
+
+		if [ ! -d ./tests/lib ]
+		then
+			echo "warning:  unable to locate tests library directory"
+		else
+			for f in `pwd`/tests/lib/*.jar
+			do
+				CLASSPATH=$f:$CLASSPATH; export CLASSPATH
+			done
 	fi
 fi

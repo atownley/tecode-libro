@@ -167,10 +167,19 @@
 		<mkdir dir="${dist.dir}/examples" />
 		
 		<copy file="LICENSE" todir="${dist.dir}" />
+		<copy file="LICENSE-hsql.txt" todir="${dist.dir}" />
+		<copy file="LICENSE-jaxor.txt" todir="${dist.dir}" />
+		<copy file="LICENSE-log4j.txt" todir="${dist.dir}" />
+		<copy file="LICENSE-postgresql.txt" todir="${dist.dir}" />
+		<copy file="LICENSE-qdox.txt" todir="${dist.dir}" />
+		<copy file="LICENSE-velocity.txt" todir="${dist.dir}" />
 		<!--copy file="RELEASE-NOTES" todir="${dist.dir}" /-->
 		<!--copy file="BUGS" todir="${dist.dir}" /-->
 		<!--copy file="TODO" todir="${dist.dir}" /-->
+		<copy file="build.properties-sample" todir="${dist.dir}" />
+		<copy file="build.properties-cmbuild" todir="${dist.dir}" />
 		<copy file="ChangeLog" todir="${dist.dir}" />
+		<copy file="MANIFEST.MF" todir="${dist.dir}" />
 		<copy file="${build.count}" todir="${dist.dir}" />
 		<copy file="${build.version}" todir="${dist.dir}" />
 		<!--copy todir="${dist.dir}/lib">

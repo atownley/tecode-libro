@@ -49,7 +49,7 @@
 <jaxor package="com.townleyenterprises.libro.backend">
   <entity name="publisher">
     <primary-key>
-      <column name="publisher_id" type="Long"/>
+      <column name="publisher_id" alias="Id" type="Long"/>
     </primary-key>
     <column name="name" type="String"/>
   </entity>

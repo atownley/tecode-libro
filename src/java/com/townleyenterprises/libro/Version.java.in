@@ -1,0 +1,395 @@
+//////////////////////////////////////////////////////////////////////
+//
+// Copyright (c) 2003-2004, Andrew S. Townley
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 
+//     * Redistributions of source code must retain the above
+//     copyright notice, this list of conditions and the following
+//     disclaimer.
+// 
+//     * Redistributions in binary form must reproduce the above
+//     copyright notice, this list of conditions and the following
+//     disclaimer in the documentation and/or other materials provided
+//     with the distribution.
+// 
+//     * Neither the names Andrew Townley and Townley Enterprises,
+//     Inc. nor the names of its contributors may be used to endorse
+//     or promote products derived from this software without specific
+//     prior written permission.  
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+// OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// File:	Version.java
+// Created:	Wed Nov 26 00:12:50 GMT 2003
+//
+//////////////////////////////////////////////////////////////////////
+
+package com.townleyenterprises.libro;
+
+import java.util.StringTokenizer;
+
+/**
+ * This class provides version information for the te-common project.
+ * It allows easy version checking from client user applications to
+ * enforce dependency checking on a particular release (if required).
+ *
+ * @version $Id: Version.java.in,v 1.1 2004/12/28 11:11:29 atownley Exp $
+ * @author <a href="mailto:adz1092@yahoo.com">Andrew S. Townley</a>
+ * @since 2.1
+ */
+
+public final class Version
+{
+	/** this is the project to which the version refers */
+	public static final String	PROJECT = "@build.version.project@";
+
+	/** this is the major version number of the build */
+	public static final int		MAJOR	= @build.version.major@;
+
+	/** this is the minor version number of the build. */
+	public static final int		MINOR	= @build.version.minor@;
+
+	/** this is the release number of the build in question */
+	public static final String	RELEASE	= "@build.version.release@";
+
+	/** this is the sequential number of the official builds */
+	public static final String	BUILD	= "@build.version.count@";
+
+	/** this is the date on which the build was performed */
+	public static final String	DATE	= "@build.version.date@";
+
+	/**
+	 * This method is used to retrieve the formatted version number
+	 * suitable for displaying in about boxes, version outputs, log
+	 * files, etc.
+	 *
+	 * @return the formatted version string
+	 */
+
+	public static String getFullVersion()
+	{
+		return Strings.format("fFullVersion",
+				new Object[] { getVersion(), getBuild() });
+	}
+
+	/**
+	 * This method is used to just get the formatted version number
+	 * without the build information.
+	 *
+	 * @return the version string
+	 */
+
+	public static String getVersion()
+	{
+		StringBuffer buf = new StringBuffer();
+		buf.append(MAJOR);
+		buf.append(".");
+		buf.append(MINOR);
+		buf.append(".");
+		buf.append(RELEASE);
+		
+		return buf.toString();
+	}
+
+	/**
+	 * This method is used to just retrieve the build portion of the
+	 * version number.
+	 *
+	 * @return the build information
+	 */
+
+	public static String getBuild()
+	{
+		return Strings.format("fBuild", new Object[] { BUILD, DATE });
+	}
+
+	/**
+	 * This method is used to require the specific minimum
+	 * version of the library be available.   If the requested
+	 * version or newer is not available, an exception is thrown.
+	 * <p>
+	 * In this case, <strong><em>newer</em></strong> means
+	 * numerically later with the special exception of DEVELOPER
+	 * builds, which will automatically always succeed.  For
+	 * prerelease builds, the <code>-pre#</code> suffix should be
+	 * omitted and the build number should be used instead.
+	 *
+	 * @param rmaj the required major version
+	 * @param rmin the required minor version
+	 * @param rrel the required release number
+	 * @param rbuild the required build number
+	 * @exception VersionMismatchException
+	 * 	if the requested version is not available
+	 * @exception NumberFormatException
+	 * 	if the required numeric values can't be converted to
+	 * 	numbers
+	 */
+
+	public static void require(int rmaj, int rmin,
+				int rrel, int rbuild)
+			throws VersionMismatchException
+	{
+		if(compare(MAJOR, MINOR, RELEASE, BUILD,
+				rmaj, rmin,
+				Integer.toString(rrel),
+				Integer.toString(rbuild)) < 0)
+			throw new VersionMismatchException(rmaj,
+					rmin, rrel, rbuild);
+	}
+
+	/**
+	 * This is an overloaded version of require which facilitates
+	 * easier version checking.
+	 *
+	 * @param checkver the version of the required build
+	 * @exception VersionMismatchException
+	 * 	if the requested version is not available
+	 * @exception NumberFormatException
+	 * 	if the required numeric values can't be converted to
+	 * 	numbers
+	 */
+
+	public static void require(String checkver)
+			throws VersionMismatchException
+	{
+		if(compare(MAJOR, MINOR, RELEASE, BUILD, checkver) < 0)
+			throw new VersionMismatchException(checkver);
+	}
+
+	/**
+	 * This utility method is used to compare two sets of version
+	 * values and report how they relate to each other.  If any of
+	 * the version strings contain a release of
+	 * <code>DEVELOPER</code>, that version will always be greater
+	 * than the other.
+	 *
+	 * @param maj1 the fist major version
+	 * @param min1 the fist minor version
+	 * @param rel1 the fist release number
+	 * @param bld1 the fist build number
+	 * @param maj2 the fist major version
+	 * @param min2 the fist minor version
+	 * @param rel2 the fist release number
+	 * @param bld2 the fist build number
+	 * @return &lt; 0 if the first is less than the second; 0 if
+	 * 	they are equal or &gt; 0 if the first is greater than
+	 * 	the second
+	 */
+
+	public static int compare(int maj1, int min1, String rel1,
+				String bld1, int maj2, int min2,
+				String rel2, String bld2)
+	{
+		if("DEVELOPER".equals(bld1))
+		{
+			System.err.println(Strings.get("sWarnDevOverride"));
+			return 1;
+		}
+		else if("DEVELOPER".equals(bld2))
+		{
+			System.err.println(Strings.get("sWarnDevOverride"));
+			return -1;
+		}
+
+		int irel1 = getReleaseNumber(rel1);
+		int ibld1 = (bld1 == null) ? 0 : Integer.parseInt(bld1);
+		
+		int irel2 = getReleaseNumber(rel2);
+		int ibld2 = (bld2 == null) ? 0 : Integer.parseInt(bld2);
+	
+		// perform the check
+		int diff = maj1 - maj2;
+		if(diff != 0)
+			return diff;
+
+		diff = min1 - min2;
+		if(diff != 0)
+			return diff;
+
+		diff = irel1 - irel2;
+		if(diff != 0)
+			return diff;
+
+		return ibld1 - ibld2;
+	}
+
+	/**
+	 * This version of compare deals with arrays of 4 string
+	 * values (as parsed by the parse method) instead of the 8
+	 * string values.
+	 *
+	 * @param ver1 the string array for version 1
+	 * @param ver2 the string array for version 2
+	 * @return &lt; 0 if the first is less than the second; 0 if
+	 * 	they are equal or &gt; 0 if the first is greater than
+	 * 	the second
+	 */
+
+	public static int compare(String[] ver1, String[] ver2)
+	{
+		return compare(Integer.parseInt(ver1[0]), 
+				Integer.parseInt(ver1[1]),
+				ver1[2], ver1[3],
+				Integer.parseInt(ver2[0]),
+				Integer.parseInt(ver2[1]),
+				ver2[2], ver2[3]);
+	}
+
+	/**
+	 * This version of compare deals with two version strings which
+	 * are expected to be in the format provided by either {@link
+	 * #getVersion} or {@link #getFullVersion}.
+	 *
+	 * @param verstr1 the first version string
+	 * @param verstr2 the second version string
+	 * @return &lt; 0 if the first is less than the second; 0 if
+	 * 	they are equal or &gt; 0 if the first is greater than
+	 * 	the second
+	 */
+
+	public static int compare(String verstr1, String verstr2)
+	{
+		return compare(parse(verstr1), parse(verstr2));
+	}
+
+	/**
+	 * This version of the compare method is used to support the
+	 * second require method.
+	 *
+	 * @param maj1 the fist major version
+	 * @param min1 the fist minor version
+	 * @param rel1 the fist release number
+	 * @param bld1 the fist build number
+	 * @param verstr the string to compare against
+	 * @return &lt; 0 if the first is less than the second; 0 if
+	 * 	they are equal or &gt; 0 if the first is greater than
+	 * 	the second
+	 */
+
+	private static int compare(int maj1, int min1,
+			String rel1, String bld1, String verstr)
+	{
+		String[] v = parse(verstr);
+		return compare(maj1, min1, rel1, bld1,
+			Integer.parseInt(v[0]), Integer.parseInt(v[1]),
+			v[2], v[3]);
+	}
+
+	/**
+	 * This method is used to parse the supplied string into an
+	 * array of String objects representing the version in the
+	 * format:
+	 * <code><em>major</em>.<em>minor</em>.<em>release</em> (Build
+	 * <em>build</em>[; <em>date</em>])</code>.  If it doesn't
+	 * match this format,
+	 * an empty array is returned.
+	 *
+	 * @param verstr the version string
+	 * @return the array containing the individual values
+	 */
+
+	public static String[] parse(String verstr)
+	{
+		// FIXME:  should use the parse capabilities...
+		
+		String[] rval = new String[4];
+
+		// first parse the version
+		int idx = verstr.indexOf(" ");
+		String sstr = verstr.substring(0,idx);
+		StringTokenizer st = new StringTokenizer(sstr, ".");
+		rval[0] = st.nextToken();
+		rval[1] = st.nextToken();
+		rval[2] = st.nextToken();
+
+		// now, grab the build number
+		sstr = verstr.substring(idx+1);
+		idx = sstr.indexOf(";");
+		if(idx == -1)
+		{
+			// no date
+			rval[3] = sstr.substring(sstr.indexOf(" ") + 1,
+				sstr.length() - 1);
+		}
+		else
+		{
+			rval[3] = sstr.substring(sstr.indexOf(" ") + 1, idx);
+		}
+
+		return rval;
+	}
+
+	public static void main(String[] args)
+	{
+		System.out.print(PROJECT);
+		System.out.print(": ");
+		System.out.println(getFullVersion());
+	}
+
+	/**
+	 * This exception is used to report version requirement
+	 * failures.
+	 */
+
+	public static class VersionMismatchException
+			extends RuntimeException
+	{
+		public VersionMismatchException(int rmaj, int rmin,
+					int rrel, int rbuild)
+		{
+			super(Strings.format("fVersionMismatch",
+				new Object[] {
+					new Integer(rmaj),
+					new Integer(rmin),
+					new Integer(rmin),
+					new Integer(rbuild),
+					getFullVersion()} ));
+		}
+
+		public VersionMismatchException(String reqver)
+		{
+			super(Strings.format("fVersionMismatch2",
+				new Object[] { reqver, getFullVersion() }));
+		}
+	}
+
+	/**
+	 * This method returns the integer value of a release number.
+	 *
+	 * @param release the release string
+	 */
+
+	private static int getReleaseNumber(String release)
+	{
+		if(release == null)
+			return 0;
+
+		int rel = 0;
+
+		int didx = release.indexOf("-");
+		if(didx != -1)
+			rel = Integer.parseInt(release.substring(0, didx));
+		else
+			rel = Integer.parseInt(release);
+
+		return rel;
+	}
+
+	/** prevent instantiation */
+	private Version() {}
+}

@@ -1,0 +1,38 @@
+
+README for Libro
+================
+
+INTRODUCTION
+
+Libro is a very simple library card catalog system.  The primary
+purpose of the application is to illustrate the common idioms I use
+when building applications using the features of the te-common Java
+Edition.
+
+I have tried to write this application using the techniques for
+producing production-grade code.  This specifically includes localized
+message resources, exception handling and a complete build
+environment.
+
+This library uses the Jaxor O/R mapping framework to provide database
+capabilities and the HSQL database to provide the actual database
+functionality.  The SQL written should be compatible with any SQL-92
+compliant database server except where noted.
+
+While this application may eventually provide useful functionality,
+that is not it's primary purpose.  The main focus of this application
+will continue to be how to properly use te-common within a "real"
+application.
+
+BUILDING
+
+To build the system, copy the build.properties-sample to 
+build.properties and edit it to suit your own configuration.  Once
+this has been done, simply build the system using ant.
+
+RUNNING
+
+Currently, there is not enough of the system in place to run.
+
+--
+$Id: README,v 1.1 2004/12/28 11:09:10 atownley Exp $

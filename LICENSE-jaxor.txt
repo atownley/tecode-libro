@@ -1,0 +1,8 @@
+	Jaxor does not provide an actual license other than
+	saying it is covered under the BSD License, so the
+	following is my own attempt to fill this gap without
+	actually making up a license myself. [Ed]
+
+Jaxor is licensed under the BSD License (an example of which may be 
+found at http://http//www.opensource.org/licenses/bsd-license.php) and
+is Copyright (c) Mike Rettig.  All Rights Reserved.

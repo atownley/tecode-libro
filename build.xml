@@ -1,0 +1,354 @@
+<?xml version="1.0"?>
+<!--
+//////////////////////////////////////////////////////////////////////
+//
+// Copyright (c) 2004, Andrew S. Townley
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 
+//     * Redistributions of source code must retain the above
+//     copyright notice, this list of conditions and the following
+//     disclaimer.
+// 
+//     * Redistributions in binary form must reproduce the above
+//     copyright notice, this list of conditions and the following
+//     disclaimer in the documentation and/or other materials provided
+//     with the distribution.
+// 
+//     * Neither the names Andrew Townley and Townley Enterprises,
+//     Inc. nor the names of its contributors may be used to endorse
+//     or promote products derived from this software without specific
+//     prior written permission.  
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+// OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// File:	build.xml
+//
+//////////////////////////////////////////////////////////////////////
+-->
+
+<project name="libro" default="all" basedir=".">
+	<property name="app.name"	value="libro"/>
+	<property name="build.home"	value="build/${app.name}"/>
+	<property name="build.dir"	value="build/classes"/>
+	<property name="build.gen.dir"	value="build/generated"/>
+	<property name="build.tests"	value="build/tests"/>
+	<property name="reports.tests"	value="build/reports"/>
+	<property name="lib.dir"	value="src/lib"/>
+	<property name="src.dir"	value="src/java"/>
+	<property name="src.sql.dir"	value="src/sql"/>
+	<property name="src.etc.dir"	value="src/etc"/>
+	<property name="tests.dir"	value="tests/java"/>
+	<property name="tests.lib.dir"	value="tests/lib"/>
+	<property name="tests.data.dir"	value="tests/data"/>
+	<property name="build.version"	value="${basedir}/version.properties"/>
+	<property name="build.date"	value="${basedir}/version.date"/>
+	<property name="build.count"	value="${basedir}/version.count"/>
+	<property file="build.properties"/>
+
+	<target name="builddate">
+		<propertyfile file="${build.date}"
+			comment=" Official build file. DO NOT EDIT.">
+			<entry key="build.version.date"
+				type="date" value="now"
+				pattern="yyyy-MM-dd HH:mm:ss z" />
+		</propertyfile>
+		<delete file="${verstamp}"/>
+	</target>
+
+	<target name="verstamp" depends="builddate" >
+		<property file="${build.version}" />
+		<property name="version"	value="${build.version.major}.${build.version.minor}.${build.version.release}"/>
+		<property name="dist.dir"	value="${app.name}-${version}"/>
+		
+		<filter filtersfile="${build.version}"/>
+		<filter filtersfile="${build.date}"/>
+		
+		<copy todir="${basedir}" filtering="true">
+			<mapper type="glob" from="*.in" to="*"/>
+			<fileset dir="${basedir}"
+				includes="**/*.in"/>
+		</copy>
+	</target>
+
+	<target name="cmbuild" depends="distclean,builddate">
+		<!-- increment the build counter -->
+		<propertyfile file="${build.count}"
+			comment=" Official build file.  DO NOT EDIT.">
+			<entry key="build.version.count" type="int"
+				operation="+" value="1" />
+		</propertyfile>
+
+		<!-- update the version information -->
+		<filter filtersfile="${build.version}"/>
+		<filter filtersfile="${build.date}"/>
+		<filter filtersfile="${build.count}"/>
+		
+		<copy todir="${basedir}" filtering="true">
+			<mapper type="glob" from="*.in" to="*"/>
+			<fileset dir="${basedir}"
+				includes="**/*.in"/>
+		</copy>
+
+		<!-- perform the build -->
+		<property file="${build.count}" />
+		<property file="${build.date}" />
+		<property file="${build.version}" />
+		<property name="version"	value="${build.version.major}.${build.version.minor}.${build.version.release}"/>
+		<property name="dist.dir"	value="${app.name}-${version}"/>
+
+		<echo message="Building ${build.version.project}: ${build.version.major}.${build.version.minor}.${build.version.release} (Build ${build.version.count}; ${build.version.date})"/>
+
+		<!-- these must be called in this order -->
+		<antcall target="dist"/>
+		<antcall target="bin-dist"/>
+	</target>
+			
+	<path id="build.cp">
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<path id="tests.cp">
+		<fileset dir="${tests.lib.dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="all" depends="verstamp,jar" />
+
+	<target name="setup">
+		<mkdir dir="${build.dir}"/>
+	</target>
+
+	<target name="compile" depends="jaxor">
+		<copy todir="${build.dir}">
+			<fileset dir="${src.dir}">
+				<exclude name="**/*.java"/>
+				<exclude name="**/*.jaxor"/>
+			</fileset>
+		</copy>
+		<javac srcdir="${src.dir}:${build.gen.dir}" destdir="${build.dir}"
+			classpathref="build.cp" debug="on" deprecation="on">
+			<include name="**/*.java"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar jarfile="${app.name}.jar"
+			basedir="${build.dir}"
+			manifest="MANIFEST.MF">
+		</jar>
+	</target>
+
+	<target name="distdirs" >
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${dist.dir}/lib" />
+		<mkdir dir="${dist.dir}/examples" />
+		
+		<copy file="LICENSE" todir="${dist.dir}" />
+		<copy file="RELEASE-NOTES" todir="${dist.dir}" />
+		<copy file="BUGS" todir="${dist.dir}" />
+		<copy file="TODO" todir="${dist.dir}" />
+		<copy file="ChangeLog" todir="${dist.dir}" />
+		<copy file="${build.count}" todir="${dist.dir}" />
+		<copy file="${build.version}" todir="${dist.dir}" />
+		<!--copy todir="${dist.dir}/lib">
+			<fileset dir="${lib.dir}"
+				includes="**/*.jar"/>
+		</copy-->
+		<copy todir="${dist.dir}/examples">
+			<fileset dir="examples"/>
+		</copy>
+	</target>
+
+	<target name="bin-dist" depends="jar,docs,distdirs">
+		<copy file="${app.name}.jar" todir="${dist.dir}/lib" />
+		<copy todir="${dist.dir}/lib">
+			<fileset dir="${basedir}" includes="${app.name}-ext*.jar"/>
+		</copy>
+		
+		<mkdir dir="${dist.dir}/docs" />
+		<copy todir="${dist.dir}/docs">
+			<fileset dir="docs"/>
+		</copy>
+		<zip destfile="${dist.dir}.zip"
+			basedir="."
+			includes="${dist.dir}/**" />
+	</target>
+
+	<target name="dist" depends="clean, distdirs">
+		<mkdir dir="${dist.dir}/java" />
+		<copy todir="${dist.dir}/java">
+			<fileset dir="java"/>
+		</copy>
+		
+		<!-- don't forget the tests -->
+		<mkdir dir="${dist.dir}/tests"/>
+		<copy todir="${dist.dir}/tests">
+			<fileset dir="tests"/>
+		</copy>
+		
+		<!-- finally do the build.xml -->
+		<copy file="build.xml" todir="${dist.dir}" />
+		<zip destfile="${dist.dir}-src.zip"
+			basedir="."
+			includes="${dist.dir}/**" />
+	</target>
+
+	<target name="docs" depends="compile">
+		<mkdir dir="docs/api"/>
+		<javadoc packagenames="com.townleyenterprises.*"
+			windowtitle="Libro API"
+			sourcepath="${src.dir}"
+			destdir="docs/api"
+			classpathref="build.cp">
+			<doctitle><![CDATA[<center><h3>Townley Enterprises Common Public API, v 0.1.0-dev<br/>API Reference</h3><br/><br/></center>]]></doctitle>
+			<bottom><![CDATA[<center>Copyright &#169; 2004, Andrew S. Townley and Townley Enterprises.  All Rights Reserved.<br/>This project is hosted on <a target="_top" href="http://te-code.sourceforge.net/">http://te-code.sourceforge.net</a>.</center>]]></bottom>
+		</javadoc>
+	</target>
+
+	<target name="clean">
+		<delete file="${app.name}.jar"/>
+		<delete file="${dist.dir}.zip"/>
+		<delete file="${dist.dir}-src.zip"/>
+		<delete dir="build"/>
+		<delete dir="docs/api"/>
+		<delete dir="${dist.dir}"/>
+		<delete>
+			<fileset dir="${basedir}" includes="${app.name}-ext*.jar"/>
+		</delete>
+	</target>
+
+	<target name="distclean" depends="clean">
+		<delete>
+			<fileset dir="${basedir}" includes="**/*">
+				<present targetdir="${basedir}">
+					<mapper type="glob" from="*" to="*.in"/>
+				</present>
+			</fileset>
+		</delete>
+		<delete>
+			<fileset dir="${basedir}" includes="${app.name}*.zip"/>
+		</delete>
+		<delete file="${build.date}"/>
+		<delete dir="clover"/>
+	</target>
+
+	<target name="compile-tests" depends="jar">
+		<mkdir dir="${build.tests}"/>
+		<copy todir="${build.tests}">
+			<fileset dir="${tests.dir}"
+				excludes="**/*.java"/>
+		</copy>
+		<javac srcdir="${tests.dir}" destdir="${build.tests}"
+			debug="on" deprecation="off">
+			<classpath>
+				<path refid="build.cp"/>
+				<pathelement location="${app.name}.jar"/>
+			</classpath>
+			<include name="**/*.java"/>
+		</javac>
+	</target>
+
+	<target name="junit" depends="compile-tests">
+		<mkdir dir="${reports.tests}"/>
+		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
+			<classpath>
+				<path refid="build.cp"/>
+				<path refid="tests.cp"/>
+				<pathelement location="${build.tests}"/>
+				<pathelement location="${app.name}.jar"/>
+			</classpath>
+			<sysproperty key="tests.data.dir" value="${tests.data.dir}"/>
+			
+			<formatter type="plain"/>
+
+			<batchtest fork="no" todir="${reports.tests}">
+				<fileset dir="${tests.dir}">
+					<include name="**/*Test*.java"/>
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<!-- clover support -->
+	<taskdef resource="clovertasks"/>
+
+	<target name="with-clover">
+		<mkdir dir="clover"/>
+		<clover-setup initString="clover/te-common.db"
+				flushpolicy="interval"
+				flushinterval="200">
+			<fileset dir="${src.dir}"/>
+		</clover-setup>
+	</target>
+
+	<target name="clover-report" depends="with-clover">
+		<clover-report>
+			<current outfile="clover/report" title="TE-Common">
+				<format type="html"/>
+			</current>
+		</clover-report>
+	</target>
+
+	<target name="clover" depends="clean,with-clover,jar,junit,clover-report"/>
+
+	<!-- jaxor target -->
+	<target name="jaxor" depends="setup">
+		<xmlcatalog id="jaxor.dtd">
+			<dtd publicId="jaxor.dtd" 
+				location="${src.etc.dir}/jaxor_3_4.dtd"/>
+		</xmlcatalog>
+		
+		<taskdef name="jaxor" classname="net.sourceforge.jaxor.parser.AntTask" classpathref="build.cp"/>
+
+		<jaxor destdir="${build.gen.dir}" validating="true">
+			<xmlcatalog refid="jaxor.dtd"/>
+			<fileset dir="${src.dir}">
+				<include name="**/*.jaxor"/>
+			</fileset>
+		</jaxor>
+	</target>
+
+	<!-- database targets -->
+	<target name="create-db" depends="jar">
+		<sql driver="${bootstrap.database.driver}"
+				url="${bootstrap.database.url}"
+				userid="${bootstrap.database.username}"
+				password="${bootstrap.database.password}">
+			<classpath>
+				<path refid="build.cp"/>
+			</classpath>
+			<transaction src="${src.sql.dir}/schema.sql"/>
+			<transaction src="${src.sql.dir}/bootstrap.sql"/>
+		</sql>
+	</target>
+
+	<target name="cleanup-db" depends="jar">
+		<sql driver="${bootstrap.database.driver}"
+				url="${bootstrap.database.url}"
+				userid="${bootstrap.database.username}"
+				password="${bootstrap.database.password}">
+			<classpath>
+				<path refid="build.cp"/>
+			</classpath>
+			<transaction src="${src.sql.dir}/cleanup.sql"/>
+		</sql>
+	</target>
+</project>

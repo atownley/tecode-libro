@@ -1,0 +1,121 @@
+
+<!ELEMENT jaxor ((import*),entity)>
+
+<!-- The java package that this entity maps too -->
+<!ATTLIST jaxor package CDATA #REQUIRED>
+
+<!ELEMENT javadoc (#PCDATA)>
+
+<!ELEMENT entity ((declarations | javadoc)*,primary-key,(aggregate|column|query|method|lazy-field|entity-ref|list-ref)*)>
+<!-- The table name -->
+<!ATTLIST entity name CDATA #REQUIRED>
+<!ATTLIST entity alias CDATA #IMPLIED>
+<!-- The java class that the entity should extend -->
+<!ATTLIST entity extends CDATA #IMPLIED>
+<!-- Any java interfaces that the entity should extend. -->
+<!ATTLIST entity implements CDATA #IMPLIED>
+
+<!-- The impl class includes any custom methods that are defined for the entity. The class extends the base entity. This
+source file is parsed and any public methods that are found are added to the entity interface. This is a convenient way to merge
+the entity persistence functionality with business methods. -->
+<!ATTLIST entity impl CDATA #IMPLIED>
+
+<!-- The java class that extends the base finder with custom functionality -->
+<!ATTLIST entity finder CDATA #IMPLIED>
+<!ATTLIST entity select-all-sql CDATA #IMPLIED>
+
+<!ATTLIST entity list CDATA #IMPLIED>
+
+<!ELEMENT primary-key (column+)>
+<!ATTLIST primary-key autoassign CDATA #IMPLIED>
+
+<!-- Foreign key element. Will resolve a single entity. If not found, will set the field to null. -->
+<!ELEMENT entity-ref (key+)>
+<!ATTLIST entity-ref table CDATA #REQUIRED>
+<!-- The full sql query used to resolve the entity. The sql must return all the fields for the entity. -->
+<!ATTLIST entity-ref query CDATA #IMPLIED>
+
+<!-- Where sql clause used to resolve the entity -->
+<!ATTLIST entity-ref find CDATA #IMPLIED>
+<!ATTLIST entity-ref alias CDATA #IMPLIED>
+
+
+<!-- Foreign key element. Will generate get/set methods for a type safe list that maps to the defined table -->
+<!ELEMENT list-ref (key+)>
+<!ATTLIST list-ref table CDATA #REQUIRED>
+<!-- The full sql query to resolve the table. The query must return all the fields required by the entity -->
+<!ATTLIST list-ref query CDATA #IMPLIED>
+<!-- The where clause used for resolving the key -->
+<!ATTLIST list-ref find CDATA #IMPLIED>
+<!ATTLIST list-ref alias CDATA #IMPLIED>
+
+<!-- used for resolving foreign keys. -->
+<!ELEMENT key EMPTY>
+<!ATTLIST key source CDATA #REQUIRED>
+<!ATTLIST key target CDATA #IMPLIED>
+
+<!-- defines an aggregate field. This means multiple db columns are mapped to a single java object -->
+<!ELEMENT aggregate (column+)>
+<!ATTLIST aggregate alias CDATA #REQUIRED>
+<!ATTLIST aggregate type CDATA #REQUIRED>
+<!ATTLIST aggregate mapper CDATA #IMPLIED>
+
+<!ELEMENT column EMPTY>
+<!-- column name -->
+<!ATTLIST column name CDATA #REQUIRED>
+<!-- Java type - String, Long, etc -->
+<!ATTLIST column type CDATA #REQUIRED>
+<!-- Used for naming bean methods if the name doesn't translate well to java -->
+<!ATTLIST column alias CDATA #IMPLIED>
+<!-- A class that implements net.sourceforge.jaxor.api.Mapper for translating between sql type objects and java objects -->
+<!ATTLIST column mapper CDATA #IMPLIED>
+<!-- wether the value can be null in the DB. Defaults to false -->
+<!ATTLIST column nullable CDATA #IMPLIED>
+<!-- match on update is used for concurrency checks. This will create a where clause to match the original field value when updating -->
+<!ATTLIST column matchonupdate CDATA #IMPLIED>
+<!-- A default value for the column. This can be any java object declaration i.e. new AddressEntity() new BigDecimal("234"), etc-->
+<!ATTLIST column default CDATA #IMPLIED>
+
+
+<!ELEMENT query (param*)>
+<!ATTLIST query name CDATA #REQUIRED>
+<!ATTLIST query sql CDATA #REQUIRED>
+
+<!ELEMENT param EMPTY>
+<!ATTLIST param name CDATA #REQUIRED>
+<!ATTLIST param type CDATA #REQUIRED>
+<!ATTLIST param mapper CDATA #IMPLIED>
+
+
+<!ELEMENT generator (extends, implements, column*)>
+
+<!ELEMENT import EMPTY>
+<!ATTLIST import name CDATA #REQUIRED>
+
+<!ELEMENT extends EMPTY>
+<!ATTLIST extends name CDATA #REQUIRED>
+
+<!ELEMENT implements EMPTY>
+<!ATTLIST implements name CDATA #REQUIRED>
+
+<!-- Creates a java method, and adds it to the entity interface -->
+<!ELEMENT method (#PCDATA | param | javadoc)*>
+<!ATTLIST method name CDATA #REQUIRED>
+<!ATTLIST method type CDATA #IMPLIED>
+<!ATTLIST method throws CDATA #IMPLIED>
+<!ATTLIST method modifier CDATA #IMPLIED>
+
+<!-- This is a lazy field. The get method is called once, then the result is cached for each call -->
+<!ELEMENT lazy-field (get, set?)>
+<!ATTLIST lazy-field name CDATA #REQUIRED>
+<!ATTLIST lazy-field type CDATA #REQUIRED>
+
+<!ELEMENT get (#PCDATA | javadoc)*>
+<!ATTLIST get modifier CDATA #IMPLIED>
+
+<!ELEMENT set (#PCDATA | javadoc)*>
+<!ATTLIST set var CDATA #IMPLIED>
+<!ATTLIST set modifier CDATA #IMPLIED>
+
+<!ELEMENT declarations (#PCDATA)>
+

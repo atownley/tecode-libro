@@ -20,7 +20,7 @@ functionality.  The SQL written should be compatible with any SQL-92
 compliant database server except where noted.
 
 While this application may eventually provide useful functionality,
-that is not it's primary purpose.  The main focus of this application
+that is not its primary purpose.  The main focus of this application
 will continue to be how to properly use te-common within a "real"
 application.
 
@@ -35,4 +35,4 @@ RUNNING
 Currently, there is not enough of the system in place to run.
 
 --
-$Id: README,v 1.1 2004/12/28 11:09:10 atownley Exp $
+$Id: README,v 1.2 2005/02/06 22:44:15 atownley Exp $

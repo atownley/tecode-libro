@@ -37,7 +37,7 @@
 -- File:		schema.sql.in
 -- Created:		Mon Dec 27 14:03:18 GMT 2004
 --
--- $Id: schema.sql.in,v 1.1 2004/12/28 11:11:29 atownley Exp $
+-- $Id: schema.sql.in,v 1.2 2005/01/02 22:42:24 atownley Exp $
 --
 ----------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ create table version_info (
 -- version information.
 ----------------------------------------------------------------------
 
-insert into version_info (what, version, rcsid) values ('@build.version.project@', '@build.version.major@.@build.version.minor@.@build.version.release@ (Build @build.version.count@; @build.version.date@)', '$Id: schema.sql.in,v 1.1 2004/12/28 11:11:29 atownley Exp $');
+insert into version_info (what, version, rcsid) values ('@build.version.project@', '@build.version.major@.@build.version.minor@.@build.version.release@ (Build @build.version.count@; @build.version.date@)', '$Id: schema.sql.in,v 1.2 2005/01/02 22:42:24 atownley Exp $');
 
 ----------------------------------------------------------------------
 -- Create a counter table to manage the ID references for the
@@ -71,7 +71,7 @@ insert into version_info (what, version, rcsid) values ('@build.version.project@
 
 create table counter (
 	what		varchar(40) not null,
-	count		integer not null,
+	val		integer not null,
 	constraint counter_pk primary key (what)
 );
 

@@ -41,10 +41,10 @@
 -- 	This file is used to provide bootstrap data required to allow
 -- 	the system to function.
 --
--- $Id: bootstrap.sql,v 1.1 2004/12/28 11:11:29 atownley Exp $
+-- $Id: bootstrap.sql,v 1.2 2005/01/02 22:42:24 atownley Exp $
 --
 ----------------------------------------------------------------------
 
-insert into counter (what, count) values ('author', 0);
-insert into counter (what, count) values ('publisher', 0);
-insert into counter (what, count) values ('book', 0);
+insert into counter (what, val) values ('author', 0);
+insert into counter (what, val) values ('publisher', 0);
+insert into counter (what, val) values ('book', 0);

@@ -57,7 +57,7 @@ import com.townleyenterprises.libro.Libro;
  * These are the unit tests for the Counter class.  The specific tests
  * should be obvious from the names of the methods.
  *
- * @version $Id: CounterTest.java,v 1.1 2005/01/02 22:46:10 atownley Exp $
+ * @version $Id: CounterTest.java,v 1.2 2005/01/09 11:21:19 atownley Exp $
  * @author <a href="mailto:atownley@users.sourceforge.net">Andrew S. Townley</a>
  */
 
@@ -72,6 +72,11 @@ public final class CounterTest extends TestCase
 		_counter = new Counter(_csize);
 		_cfactory = Libro.getConnectionFactory();
 		_rez = new Result();
+	}
+
+	public void tearDown() throws Exception
+	{
+		Libro.shutdown();
 	}
 
 	public void testInitialCounterValue() throws Exception

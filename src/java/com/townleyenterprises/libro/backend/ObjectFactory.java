@@ -67,7 +67,7 @@ import com.townleyenterprises.libro.Libro;
  * This idiom is borrowed from the Jaxor domain example, and it
  * provides a reasonable place to centralize this functionality.
  * </p>
- * @version $Id: ObjectFactory.java,v 1.1 2005/01/02 22:00:24 atownley Exp $
+ * @version $Id: ObjectFactory.java,v 1.2 2005/01/09 11:16:33 atownley Exp $
  * @author <a href="mailto:atownley@users.sourceforge.net">Andrew S. Townley</a>
  */
 
@@ -77,19 +77,26 @@ public final class ObjectFactory
 	 * This method is used to create a new Publisher instance
 	 * based on the next available primary key.
 	 *
+	 * @param name the name of the publisher
 	 * @return the instance
 	 */
 
-	public static PublisherEntity createPublisher()
+	public static PublisherEntity createPublisher(String name)
 	{
-		_trace.methodStart("createPublisher");
+		final String[] pn = new String[] { "name" };
+		_trace.methodStart("createPublisher", pn,
+				new Object[] { name });
 
 		try
 		{
 			Long id = new Long(_counter.getNextId("publisher"));
+			PublisherEntity pe = PublisherFinder.newInstance(id);
+			pe.setName(name);
 
-			return (PublisherEntity)_trace.methodReturn(
-				PublisherFinder.newInstance(id));
+			Libro.logInfo("log.fCreatedPublisher",
+					new Object[] { name, id });
+
+			return (PublisherEntity)_trace.methodReturn(pe);
 		}
 		catch(SQLException e)
 		{
@@ -110,19 +117,28 @@ public final class ObjectFactory
 	 * This method is used to create a new Author instance
 	 * based on the next available primary key.
 	 *
+	 * @param lname the last name of the author
+	 * @param fname the first name of the author
 	 * @return the instance
 	 */
 
-	public static AuthorEntity createAuthor()
+	public static AuthorEntity createAuthor(String lname, String fname)
 	{
-		_trace.methodStart("createAuthor");
+		final String[] pn = new String[] { "lname",  "fname" };
+		_trace.methodStart("createAuthor", pn, 
+				new Object[] { lname, fname });
 
 		try
 		{
 			Long id = new Long(_counter.getNextId("author"));
+			AuthorEntity ae = AuthorFinder.newInstance(id);
+			ae.setLastName(lname);
+			ae.setFirstName(fname);
 
-			return (AuthorEntity)_trace.methodReturn(
-				AuthorFinder.newInstance(id));
+			Libro.logInfo("log.fCreatedAuthor",
+				new Object[] { lname, fname, id });
+
+			return (AuthorEntity)_trace.methodReturn(ae);
 		}
 		catch(SQLException e)
 		{
@@ -140,18 +156,20 @@ public final class ObjectFactory
 	 * based on the next available primary key and the appropriate
 	 * references to the author and the publisher entities.
 	 *
+	 * @param title the title of the book
 	 * @param publisher the publisher of the book
 	 * @param author the author of the book
 	 * @return the instance
 	 */
 
-	public static BookEntity createBook(PublisherEntity publisher,
+	public static BookEntity createBook(String title,
+				PublisherEntity publisher,
 				AuthorEntity author)
 	{
-		final String[] pn = new String[] { "publisher",  "author" };
+		final String[] pn = new String[] { "title", "publisher",  "author" };
 
 		_trace.methodStart("createBook", pn, 
-				new Object[] { publisher, author });
+				new Object[] { title, publisher, author });
 
 		try
 		{
@@ -160,6 +178,10 @@ public final class ObjectFactory
 
 			be.setPublisherEntity(publisher);
 			be.setAuthorEntity(author);
+			be.setTitle(title);
+			
+			Libro.logInfo("log.fCreatedBook",
+				new Object[] { title, id });
 
 			return (BookEntity)_trace.methodReturn(be);
 		}
@@ -184,17 +206,20 @@ public final class ObjectFactory
 	 * alternate form of the method should be used.
 	 * </p>
 	 *
+	 * @param title the title of the book
 	 * @param publisher_id the ID for the publisher of the book
 	 * @param author_id the ID for the author of the book
 	 * @return the instance
 	 */
 
-	public static BookEntity createBook(long publisher_id, long author_id)
+	public static BookEntity createBook(String title,
+				long publisher_id, long author_id)
 	{
-		final String[] pn = new String[] { "publisher_id",  "author_id" };
+		final String[] pn = new String[] { "title", "publisher_id",  "author_id" };
 
 		_trace.methodStart("createBook", pn, 
-				new Object[] { new Long(publisher_id),
+				new Object[] { title, 
+					new Long(publisher_id),
 					new Long(author_id) });
 
 		try
@@ -211,6 +236,11 @@ public final class ObjectFactory
 				AuthorFinder.selectByPrimaryKey(
 					new Long(author_id)));
 
+			be.setTitle(title);
+
+			Libro.logInfo("log.fCreatedBook",
+				new Object[] { title, id });
+
 			return (BookEntity)_trace.methodReturn(be);
 		}
 		catch(SQLException e)
@@ -224,11 +254,22 @@ public final class ObjectFactory
 		}
 	}
 
+	/**
+	 * This is a unit-test support method to retrieve a reference
+	 * to the shared counter.  We should only have ONE counter
+	 * instance per application.
+	 */
+
+	static Counter getCounter()
+	{
+		return _counter;
+	}
+
 	/** keep track of our counter instance */
 	private static final Counter	_counter;
 	
 	/** our trace instance */
-	private static final BasicTrace	_trace = new BasicTrace("ObjectFActory");
+	private static final BasicTrace	_trace = new BasicTrace("ObjectFactory");
 	
 	/**
 	 * The purpose of this static block is to initialize the value

@@ -41,15 +41,20 @@
 
 package com.townleyenterprises.libro.backend;
 
-import java.sql.DriverManager;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import net.sourceforge.jaxor.db.ConnectionDecorator;
 
-import com.townleyenterprises.libro.Libro;
+import com.townleyenterprises.common.VersionMismatchException;
 import com.townleyenterprises.persistence.PersistenceConfig;
 import com.townleyenterprises.trace.BasicTrace;
+
+import com.townleyenterprises.libro.Libro;
+import com.townleyenterprises.libro.Version;
 
 /**
  * This class creates and manages a single connection to the database.
@@ -70,7 +75,7 @@ import com.townleyenterprises.trace.BasicTrace;
  * "Double Checked Locking is Broken" Declaration</a></em>.
  * </p>
  *
- * @version $Id: LibroConnectionFactory.java,v 1.3 2005/01/02 21:42:52 atownley Exp $
+ * @version $Id: LibroConnectionFactory.java,v 1.4 2005/01/09 11:15:53 atownley Exp $
  * @author <a href="mailto:atownley@users.sourceforge.net">Andrew S. Townley</a>
  */
 
@@ -109,7 +114,8 @@ public final class LibroConnectionFactory
 		{
 			if(_conn == null)
 			{
-				_conn = ConnectionDecorator.createNonClosing(initConnection());
+				_orig = initConnection();
+				_conn = ConnectionDecorator.createNonClosing(_orig);
 			}
 
 			return (Connection)_trace.methodReturn(_conn);
@@ -126,6 +132,41 @@ public final class LibroConnectionFactory
 			
 			RuntimeException re = new RuntimeException(t);
 			throw (RuntimeException)_trace.methodThrow(re, true);
+		}
+		finally
+		{
+			_trace.methodExit();
+		}
+	}
+
+	/**
+	 * This method is used to terminate the connection factory's
+	 * connections.
+	 */
+
+	public synchronized void end()
+	{
+		_trace.methodStart("end");
+
+		try
+		{
+			_conn = null;
+			if(_orig != null)
+			{
+				_orig.close();
+				_orig = null;
+			}
+			
+			Libro.logInfo("log.sConnectionClosed");
+
+			_trace.methodReturn();
+		}
+		catch(SQLException e)
+		{
+			Libro.logError("log.sErrorClosingConnection",
+					new Object[] { e });
+			_trace.tprintln(0, "caught exception trying to close database connection");
+			_trace.printStackTrace(0, e);
 		}
 		finally
 		{
@@ -151,7 +192,7 @@ public final class LibroConnectionFactory
 	 * 	if the connection cannot be made
 	 */
 
-	public Connection initConnection()
+	private Connection initConnection()
 			throws ClassNotFoundException,
 				SQLException
 	{
@@ -173,6 +214,7 @@ public final class LibroConnectionFactory
 			Libro.logInfo("log.fCreatedDatabaseConnection",
 				new Object[] { curl, user });
 
+			checkSchemaVersion(conn);
 			return (Connection)_trace.methodReturn(conn);
 		}
 		finally
@@ -181,8 +223,109 @@ public final class LibroConnectionFactory
 		}
 	}
 
+	/**
+	 * This method is used to make sure that we are connecting to
+	 * a compatible database instance.  If the database is not
+	 * compatible, an exception is thrown.
+	 * Compatibility is based on the REQUIRED_VERSION string
+	 * defined here which should be updated whenever the database
+	 * schema is changed.
+	 *
+	 * @param conn the database connection to use
+	 * @exception VersionMismatchException
+	 * 	if the database version is not sufficient
+	 * @exception SQLException
+	 * 	if there is any other database problems
+	 */
+
+	private static void checkSchemaVersion(Connection conn)
+			throws VersionMismatchException,
+				SQLException
+	{
+		final String[] pn = new String[] { "conn" };
+		_trace.methodStart("checkDatabaseVersion", pn,
+				new Object[] { conn });
+
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try
+		{
+			String sql = SQL.get("version.get");
+			stmt = conn.prepareStatement(sql);
+			stmt.setString(1, Version.PROJECT);
+			
+			rs = stmt.executeQuery();
+			if(!rs.next())
+			{
+				SQLException se = new SQLException(Strings.get("sNoVersionInfo"));
+				throw (SQLException)_trace.methodThrow(se, true);
+			}
+
+			// process our result
+			String ver = rs.getString(1);
+			String installed = rs.getString(2);
+			String rcsid = rs.getString(3);
+			
+			// manually do the compare since it isn't
+			// relative to our own version.
+			if(Version.compare(ver, REQUIRED_VERSION) < 0)
+			{
+				try
+				{
+					if(conn != null)
+						conn.close();
+				}
+				catch(SQLException e)
+				{
+					Libro.logError("log.fUnableToCloseConnection", new Object[] { e });
+				}
+
+				VersionMismatchException vme;
+				vme = new VersionMismatchException(REQUIRED_VERSION, ver);
+				throw (VersionMismatchException)_trace.methodThrow(vme, true);
+			}
+
+			// if we get here, everything is kosher
+			Libro.logInfo("log.fSchemaVersion",
+				new Object[] { ver, installed, rcsid });
+
+			_trace.methodReturn();
+		}
+		finally
+		{
+			try
+			{
+				if(rs != null)
+					rs.close();
+			}
+			catch(SQLException e)
+			{
+				Libro.logError("log.fUnableToCloseResultSet", new Object[] { e });
+			}
+
+			try
+			{
+				if(stmt != null)
+					stmt.close();
+			}
+			catch(SQLException e)
+			{
+				Libro.logError("log.fUnableToCloseStatement", new Object[] { e });
+			}
+
+			_trace.methodExit();
+		}
+	}
+	 
 	/** maintain a reference to our connection */
 	private Connection		_conn = null;
+
+	/** maintain a reference to the original connection */
+	private Connection		_orig = null;
+
+	/** the minimum required version of the database schema */
+	private static final String	REQUIRED_VERSION = "0.1.0 (Build 1)";
 
 	/** our trace instance */
 	private static final BasicTrace	_trace = new BasicTrace("LibroConnectionFactory");

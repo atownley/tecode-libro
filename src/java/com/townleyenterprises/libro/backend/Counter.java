@@ -75,7 +75,7 @@ import com.townleyenterprises.libro.Libro;
  * when using PostgreSQL 7.[34].  However, any bugs in this
  * implementation are mine alone... ;) </p>
  *
- * @version $Id: Counter.java,v 1.1 2005/01/02 22:00:58 atownley Exp $
+ * @version $Id: Counter.java,v 1.2 2005/01/09 11:15:24 atownley Exp $
  * @author <a href="mailto:atownley@users.sourceforge.net">Andrew S. Townley</a>
  */
 
@@ -257,7 +257,7 @@ public class Counter
 			// again, allow for the peek to be the first
 			// operation
 
-			if((_count  + 1) > _size)
+			if((_count + 1) > _size)
 				refreshCache();
 
 			return _nextid + 1;

@@ -53,6 +53,6 @@
     </primary-key>
     <column name="first_name" type="String" nullable="true"/>
     <column name="last_name" type="String"/>
-    <column name="middle_initial" type="String"/>
+    <column name="middle_initial" type="String" nullable="true"/>
   </entity>
 </jaxor>

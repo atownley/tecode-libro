@@ -167,9 +167,9 @@
 		<mkdir dir="${dist.dir}/examples" />
 		
 		<copy file="LICENSE" todir="${dist.dir}" />
-		<copy file="RELEASE-NOTES" todir="${dist.dir}" />
-		<copy file="BUGS" todir="${dist.dir}" />
-		<copy file="TODO" todir="${dist.dir}" />
+		<!--copy file="RELEASE-NOTES" todir="${dist.dir}" /-->
+		<!--copy file="BUGS" todir="${dist.dir}" /-->
+		<!--copy file="TODO" todir="${dist.dir}" /-->
 		<copy file="ChangeLog" todir="${dist.dir}" />
 		<copy file="${build.count}" todir="${dist.dir}" />
 		<copy file="${build.version}" todir="${dist.dir}" />
@@ -177,9 +177,9 @@
 			<fileset dir="${lib.dir}"
 				includes="**/*.jar"/>
 		</copy-->
-		<copy todir="${dist.dir}/examples">
+		<!--copy todir="${dist.dir}/examples">
 			<fileset dir="examples"/>
-		</copy>
+		</copy-->
 	</target>
 
 	<target name="bin-dist" depends="jar,docs,distdirs">
@@ -198,9 +198,9 @@
 	</target>
 
 	<target name="dist" depends="clean, distdirs">
-		<mkdir dir="${dist.dir}/java" />
-		<copy todir="${dist.dir}/java">
-			<fileset dir="java"/>
+		<mkdir dir="${dist.dir}/src" />
+		<copy todir="${dist.dir}/src">
+			<fileset dir="src"/>
 		</copy>
 		
 		<!-- don't forget the tests -->

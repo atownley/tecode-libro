@@ -1,0 +1,15 @@
+2004-12-28 Andrew S. Townley <atownley>
+	* Added connection factory support for use by both te-common
+	  and Jaxor.
+	
+	* src/java/com/townleyenterprises/libro/Libro.java
+
+	  Added support for persistence factory and Jaxor transaction
+	  to the main application class.
+	
+	* src/sql/cleanup.sql
+
+	  Removed validuser table which was causing cleanup-db target
+	  to fail.
+	
+	* Updated te-common.jar

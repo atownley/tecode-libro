@@ -1,3 +1,16 @@
+2005-02-07 Andrew S. Townley <atownley>
+	* build.xml
+
+	  Fixed omissions in files copied to the distribution directory
+	  when building the bundles.
+
+2005-02-06 Andrew S. Townley <atownley>
+	* Updated te-common.jar to 3.0.0-pre3
+
+	* README
+
+	  Added more information about building and running junit tests.
+
 2005-01-02 Andrew S. Townley <atownley>
 	* Added unit test mechanism
 

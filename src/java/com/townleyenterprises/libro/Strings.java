@@ -43,13 +43,12 @@ package com.townleyenterprises.libro;
 
 import com.townleyenterprises.common.ResourceLoader;
 import com.townleyenterprises.common.ResourceManager;
-import com.townleyenterprises.common.Version;
 
 /**
  * This class is used to track all of the localized strings used for
  * messages in this package.
  *
- * @version $Id: Strings.java,v 1.2 2005/01/02 22:41:15 atownley Exp $
+ * @version $Id: Strings.java,v 1.3 2005/01/09 11:12:56 atownley Exp $
  * @author <a href="mailto:adz1092@yahoo.com">Andrew S. Townley</a>
  * @since 3.0
  */
@@ -79,6 +78,5 @@ final class Strings
 	static
 	{
 		_resources.manage(new ResourceLoader(Strings.class));
-		_resources.manage(new ResourceLoader(Version.class));
 	}
 }

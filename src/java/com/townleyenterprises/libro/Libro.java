@@ -48,12 +48,18 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import net.sourceforge.jaxor.api.JaxorTransaction;
+import net.sourceforge.jaxor.db.SingleConnectionTransaction;
+
 import com.townleyenterprises.config.AppConfig;
 import com.townleyenterprises.config.ConfigRegistry;
 import com.townleyenterprises.config.ConfigSupplier;
 import com.townleyenterprises.config.PropertiesConfigSupplier;
 import com.townleyenterprises.config.WriteCaptureStrategy;
+import com.townleyenterprises.persistence.ConnectionFactory;
 import com.townleyenterprises.trace.BasicTrace;
+
+import com.townleyenterprises.libro.backend.LibroConnectionFactory;
 
 /**
  * This class effectively provides a global which can be used to
@@ -75,7 +81,7 @@ import com.townleyenterprises.trace.BasicTrace;
  * find the appropriate logger.
  * </p>
  *
- * @version $Id: Libro.java,v 1.1 2004/12/28 11:11:30 atownley Exp $
+ * @version $Id: Libro.java,v 1.2 2004/12/28 21:58:06 atownley Exp $
  * @author <a href="mailto:atownley@users.sourceforge.net">Andrew S. Townley</a>
  */
 
@@ -121,6 +127,46 @@ public final class Libro
 	public static ConfigSupplier getConfig()
 	{
 		return ConfigRegistry.getConfig("libro");
+	}
+
+	/**
+	 * This method is used to return a singleton instance of the
+	 * ConnectionFactory to be used by the application.
+	 *
+	 * @return the connection factory
+	 */
+
+	public static ConnectionFactory getConnectionFactory()
+	{
+		return _cfactory;
+	}
+
+	/**
+	 * This method is used to return an appropriate instance of
+	 * the JaxorTransaction to be used by the JaxorSession.
+	 *
+	 * @return the JaxorTransaction
+	 */
+
+	public static JaxorTransaction getJaxorTransaction()
+	{
+		// the creation of the new object follows the Jaxor
+		// example pattern of providing a new object to each
+		// JaxorSession.begin().  The main reason for this
+		// that I can think of is that Jaxor maintains it's
+		// transaction in a ThreadLocal, so there is a good
+		// reason for giving out a new instance each time.
+		//
+		// Also, there is a good reason that the _cfactory is
+		// declared as a LibroConnectionFactory rather than
+		// just a ConnectionFactory.  This is because it
+		// implements our ConnectionFactory and Jaxor's, but
+		// you can't return one of both at the same time
+		// unless you make a new interface, which I didn't
+		// want to do.  Strongly typing the instance means
+		// that I can avoid a cast within this method.
+
+		return new SingleConnectionTransaction(_cfactory);
 	}
 
 	/**
@@ -432,11 +478,14 @@ public final class Libro
 	}
 
 	/** maintain a sentinal to ensure only are initialized once */
-	private static boolean		_initialized = false;
+	private static boolean			_initialized = false;
+
+	/** maintain a reference to the connection factory */
+	private static LibroConnectionFactory	_cfactory = new LibroConnectionFactory();
 
 	/** create a logger instance */
-	private static Logger		_logger = Logger.getLogger("com.townleyenterprises.libro.Libro");
+	private static Logger			_logger = Logger.getLogger("com.townleyenterprises.libro.Libro");
 
 	/** create a trace instance */
-	private static BasicTrace	_trace = new BasicTrace("Libro");
+	private static BasicTrace		_trace = new BasicTrace("Libro");
 }

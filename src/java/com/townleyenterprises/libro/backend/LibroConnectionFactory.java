@@ -70,7 +70,7 @@ import com.townleyenterprises.trace.BasicTrace;
  * "Double Checked Locking is Broken" Declaration</a></em>.
  * </p>
  *
- * @version $Id: LibroConnectionFactory.java,v 1.2 2005/01/02 21:23:45 atownley Exp $
+ * @version $Id: LibroConnectionFactory.java,v 1.3 2005/01/02 21:42:52 atownley Exp $
  * @author <a href="mailto:atownley@users.sourceforge.net">Andrew S. Townley</a>
  */
 
@@ -163,11 +163,15 @@ public final class LibroConnectionFactory
 						Libro.getConfig());
 			Class.forName(pc.getDriverName());
 
+			String curl = pc.getConnectionURL();
+			String user = pc.getUser();
+
 			// now we try and make the connection
 			Connection conn = DriverManager.getConnection(
-					pc.getConnectionURL(),
-					pc.getUser(),
-					pc.getPassword());
+					curl, user, pc.getPassword());
+
+			Libro.logInfo("log.fCreatedDatabaseConnection",
+				new Object[] { curl, user });
 
 			return (Connection)_trace.methodReturn(conn);
 		}

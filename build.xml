@@ -148,8 +148,7 @@
 		<copy file="build.properties-cmbuild" todir="${dist.dir}" />
 		<copy file="ChangeLog" todir="${dist.dir}" />
 		<copy file="MANIFEST.MF" todir="${dist.dir}" />
-		<copy file="${build.count}" todir="${dist.dir}" />
-		<copy file="${build.version}" todir="${dist.dir}" />
+		<copy file="${stamp.info}" todir="${dist.dir}" />
 		<!--copy todir="${dist.dir}/lib">
 			<fileset dir="${lib.dir}"
 				includes="**/*.jar"/>

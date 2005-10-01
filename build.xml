@@ -56,66 +56,34 @@
 	<property name="tests.lib.dir"	value="tests/lib"/>
 	<property name="tests.sql.dir"	value="tests/sql"/>
 	<property name="tests.data.dir"	value="tests/data"/>
-	<property name="build.version"	value="${basedir}/version.properties"/>
-	<property name="build.date"	value="${basedir}/version.date"/>
-	<property name="build.count"	value="${basedir}/version.count"/>
+	<property name="stamp.info"	value="${basedir}/version.properties"/>
 	<property file="build.properties"/>
 
-	<target name="builddate">
-		<propertyfile file="${build.date}"
-			comment=" Official build file. DO NOT EDIT.">
-			<entry key="build.version.date"
-				type="date" value="now"
-				pattern="yyyy-MM-dd HH:mm:ss z" />
-		</propertyfile>
-		<delete file="${verstamp}"/>
-	</target>
+	<taskdef name="buildstamp" classname="com.townleyenterprises.ant.BuildStampTask" classpath="${tests.lib.dir}/te-common-ant.jar"/>
 
-	<target name="verstamp" depends="builddate">
-		<property file="${build.version}" />
-		<property name="version"	value="${build.version.major}.${build.version.minor}.${build.version.release}"/>
+	<path id="stampfiles">
+		<fileset dir="${basedir}">
+			<include name="**/*.in"/>
+		</fileset>
+	</path>
+
+	<target name="verstamp">
+		<buildstamp versioninfo="${stamp.info}">
+			<path refid="stampfiles"/>
+		</buildstamp>
+		<property name="version"	value="${build.version}"/>
 		<property name="dist.dir"	value="${app.name}-${version}"/>
-		
-		<filter filtersfile="${build.version}"/>
-		<filter filtersfile="${build.date}"/>
-		<filter filtersfile="build.properties"/>
-		
-		<copy todir="${basedir}" filtering="true">
-			<mapper type="glob" from="*.in" to="*"/>
-			<fileset dir="${basedir}"
-				includes="**/*.in"/>
-		</copy>
 	</target>
 
-	<target name="cmbuild" depends="distclean,builddate"
+	<target name="cmbuild" depends="distclean"
 			description="This is the automated build target.">
-		<!-- increment the build counter -->
-		<propertyfile file="${build.count}"
-			comment=" Official build file.  DO NOT EDIT.">
-			<entry key="build.version.count" type="int"
-				operation="+" value="1" />
-		</propertyfile>
-
-		<!-- update the version information -->
-		<filter filtersfile="${build.version}"/>
-		<filter filtersfile="${build.date}"/>
-		<filter filtersfile="${build.count}"/>
-		<filter filtersfile="build.properties"/>
-		
-		<copy todir="${basedir}" filtering="true">
-			<mapper type="glob" from="*.in" to="*"/>
-			<fileset dir="${basedir}"
-				includes="**/*.in"/>
-		</copy>
-
-		<!-- perform the build -->
-		<property file="${build.count}" />
-		<property file="${build.date}" />
-		<property file="${build.version}" />
-		<property name="version"	value="${build.version.major}.${build.version.minor}.${build.version.release}"/>
+		<buildstamp versioninfo="${stamp.info}" count="true">
+			<path refid="stampfiles"/>
+		</buildstamp>
+		<property name="version"	value="${build.version}"/>
 		<property name="dist.dir"	value="${app.name}-${version}"/>
 
-		<echo message="Building ${build.version.project}: ${build.version.major}.${build.version.minor}.${build.version.release} (Build ${build.version.count}; ${build.version.date})"/>
+		<echo message="Building ${build.version.project}: ${build.version} (Build ${build.version.count}; ${build.version.date})"/>
 
 		<!-- these must be called in this order -->
 		<antcall target="dist"/>
@@ -245,24 +213,14 @@
 		<delete dir="build"/>
 		<delete dir="docs/api"/>
 		<delete dir="${dist.dir}"/>
-		<delete>
-			<fileset dir="${basedir}" includes="${app.name}-ext*.jar"/>
-		</delete>
 	</target>
 
 	<target name="distclean" depends="clean"
 			description="This target removes *all* of the generated build files.">
-		<delete>
-			<fileset dir="${basedir}" includes="**/*">
-				<present targetdir="${basedir}">
-					<mapper type="glob" from="*" to="*.in"/>
-				</present>
-			</fileset>
-		</delete>
+		<buildstamp clean="true"/>
 		<delete>
 			<fileset dir="${basedir}" includes="${app.name}*.zip"/>
 		</delete>
-		<delete file="${build.date}"/>
 	</target>
 
 	<target name="compile-tests" depends="jar">
